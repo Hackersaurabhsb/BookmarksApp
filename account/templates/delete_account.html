@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Delete your account {% endblock %}
+{% block content %}
+<h1>Do you want to delete your account ?</h1>
+{% if form.errors %}
+<p>Unable to verify please try again later</p>
+{% endif %}
+<form method="post">
+    {{form.as_p}}
+    {% csrf_token %}
+<input type="submit" value="Delete account">
+<input type="submit" value="{{ error }}">
+</form>
+
+{% endblock %}

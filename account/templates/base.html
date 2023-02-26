@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+ <title>{% block title %}{% endblock %}</title>
+ <link href="{% static 'css/base.css' %}" rel="stylesheet">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+ <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+ <!--below script is to close messages-->
+ <script>
+    $(document).ready(function() {
+        // messages timeout for 10 sec 
+        setTimeout(function() {
+            $('.message').fadeOut('slow');
+        }, 1000); // <-- time in milliseconds, 1000 =  1 sec
+
+        // delete message
+        $('.del-msg').on('click',function(){
+            $('.del-msg').parent().attr('style', 'display:none;');
+        })
+    });
+</script>
+</head>
+<body>
+ <div id="header">
+
+ <span class="logo">Bookmarks</span>
+ {% if request.user.is_authenticated %}
+ <ul class="menu">
+    <li {% if section == "dashboard" %} class="selected" {% endif %}>
+        <a href="{% url 'dashboard' %}">My Dashboard</a>
+    </li>
+    <li {% if section == "images" %} class="selected" {% endif %}>
+        <a href="{% url 'images:list' %}">Images</a> 
+
+    </li>
+    <li {% if section == "people" %} class="selected" {% endif %}>
+        <a href="{% url 'user_list' %}">People</a>
+
+    </li>
+ </ul>
+ {% endif %}
+ <span class="user">
+    {% if request.user.is_authenticated %}
+    <ul class="menu">
+        <!-- <li>
+           
+        </li> -->
+       
+   
+        {% if request.user.profile.photo %}
+       <li>
+        <a href="{% url 'change_profile' %}"><img src="{{ request.user.profile.photo.url }}" alt="img" class="profile "></a>
+       </li>
+       {% else %}
+       <a href="{% url 'change_profile' %}"><img src="{% static 'pngwing.png' %}" alt="img" class="profile"></a>
+       {% endif %}
+       <li>
+        Hello {{ request.user.first_name|default:request.user.username }},
+        </li>   
+       <li>
+        <a href="{% url "logout" %}">  Logout  </a>
+        </li>
+        <li>
+        <a href="{% url "settings" %}"><i class="fa fa-cog fa-spin fa-1x"></i> Settings</a>
+        </li>
+        {% else %}
+        <li>
+        <a href="{% url "login" %}">Login</a>
+        </li>
+        {% endif %}
+        </ul>
+    </span>
+ </div>
+ {% if messages %}
+ <ul class="messages">
+ {% for message in messages %}
+ <li class="{{ message.tags }}">
+ {{ message|safe }}
+ <a href="#" class="del-msg close">&times;</a>
+ </li>
+ {% endfor %}
+ </ul>
+ {% endif %}
+ <div id="content">
+ {% block content %}
+ {% endblock %}
+ </div>
+ <script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+ <script>
+    const csrftoken=Cookies.get('csrftoken')
+
+    document.addEventListener("DOMContentLoaded",(event) => {
+        {% block domready %}
+        {% endblock %}
+    })
+ </script>
+ <!-- To include the token in HTTP requests that originate from JavaScript, we will need to retrieve the 
+ CSRF token from the csrftoken cookie, which is set by Django if the CSRF protection is active. To 
+ handle cookies, we will use the JavaScript Cookie library. JavaScript Cookie is a lightweight JavaScript 
+ API for handling cookies -->
+</body>
+</html>

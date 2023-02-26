@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Change Profile Picture {% endblock %}
+{% block content %}
+<h1>Change your profile picture</h1>
+<form action="{% url 'change_profile' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p><input type="submit" value="Change Picture"></p>
+</form>
+{% endblock %}

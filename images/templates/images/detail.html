@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ image.title }}{% endblock %}
+{% block content %}
+<h1>{{ image.title }}</h1>
+{% load thumbnail %}
+<a href="{{ image.image.url }}">
+<img src="{% thumbnail image.image 300x0 quality=100 %}" alt="" class="image-detail">
+</a>
+{% with total_likes_count=image.users_like.count users_like=image.users_like.all %}
+<!-- Whenever you need to repeat a query in your template, use the with template tag 
+to avoid additional database queries. -->
+
+<div class="image_info">
+    <div>
+        <span class="count">
+            <span class="total">{{ total_likes_count }}</span>
+            like{{ total_likes_count|pluralize }}
+        </span>
+        <!-- Any attribute on any HTML element with a name that starts with data- is a data attribute. 
+Data attributes are used to store custom data for your application -->
+<!--perfectly working till line 30-->
+        <a href="#" data-id="{{ image.id }}" data-action="{% if request.user in users_like %} un{% endif %}like" class="like button">
+            {% if request.user not in users_like %}
+            like
+            {% else %}
+            unlike
+            {% endif %}
+
+        </a>
+        <!-- We will send the value of the data-id and data-action attributes in the HTTP request to the image_like
+view. When a user clicks on the like/unlike link, we will need to perform the following actions in 
+the browser:
+1. Send an HTTP POST request to the image_like view, passing the image id and the action parameters to it.
+2. If the HTTP request is successful, update the data-action attribute of the <a> HTML element 
+with the opposite action (like / unlike), and modify its display text accordingly.
+3. Update the total number of likes displayed on the page. -->
+    </div>
+    {{ image.description|linebreaks }}
+
+</div>
+<div class="image-likes">
+    <p>Liked by</p>
+    {% for user in users_like %}
+    <div>
+        {% if user.profile.photo %}
+        <img src="{{ user.profile.photo.url }}" alt="Profile picture">
+        {% endif %}
+        <p>{{ user.first_name }}</p>
+
+    </div>
+    {% empty %}
+    <p>Nobody likes this image yet</p>
+    {% endfor %}
+</div>
+{% endwith %}
+{% endblock %}
+{% block domready %}
+console.log("Block loaded")
+const url='{% url "images:like" %}'; 
+console.log("Executed")
+var options={
+    method:'POST',
+    headers:{'X-CSRFToken':csrftoken},
+    mode:'same-origin'
+}
+console.log("executed")
+document.querySelector('a.like').addEventListener('click',function(e){
+    e.preventDefault();
+    var likeButton=this;
+    console.log("executed")
+    <!--add request body-->
+    var formData=new FormData()
+    formData.append('id',likeButton.dataset.id);
+    formData.append('action',likeButton.dataset.action);
+    options['body']=formData;
+    <!--send http request -->
+    console.log("before fetch")
+    fetch(url,options).then(response => response.json()).then(data =>{
+        if (data['status']==='ok')
+        {
+            var previousAction=likeButton.dataset.action;
+            <!--toggle button text and data-action-->
+            var action=previousAction==='like'?'unlike':'like';
+            likeButton.dataset.action=action;
+            likeButton.innerHTML=action;
+            <!--- update like count -->
+            var likeCount=document.querySelector('span.count .total');
+            var totalLikes=parseInt(likeCount.innerHTML);
+            likeCount.innerHTML=previousAction==='like'?totalLikes+1:totalLikes-1;
+        }
+
+    })
+});
+{% endblock %}

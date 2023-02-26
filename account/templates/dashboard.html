@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<p>Welcome to your dashboard.</p>
+{% with total_images_created=request.user.images_created.count %}
+<p>You have Bookmarked {{ total_images_created }} image{{total_images_created|pluralize}}</p>
+{% endwith %}
+<p>
+    Drag the following button to bookmark tab of your browser to bookmark images from other websites
+    <a href="javascript:{% include 'images/bookmarklet_launcher.js' %}" class="button">Bookmark it</a>
+</p>
+
+<p>You can now <a href="{% url 'password_change' %}">CHANGE PASSWORD</a> or <a href="{% url 'edit' %}"> EDIT YOUR PROFILE</a></p>
+{% endblock %}
+
+<!-- Make sure that no template tag is split into multiple lines; Django doesn’t support multiple-line tags.
+The dashboard now displays the total number of images bookmarked by the user. We have added a
+with template tag to create a variable with the total number of images bookmarked by the current 
+user. We have included a link with an href attribute that contains the bookmarklet launcher script. 
+This JavaScript code is loaded from the bookmarklet_launcher.js template. -->
